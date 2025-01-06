@@ -1,6 +1,8 @@
 package com.flip.service.services;
 
 import com.flip.data.entity.AppUser;
+import com.flip.service.pojo.request.BvnVerificationRequest;
+import com.flip.service.pojo.request.ProfileVerificationRequest;
 import com.flip.service.pojo.request.UserRequest;
 import com.flip.service.pojo.response.BaseResponse;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,13 +22,17 @@ public interface UserService extends UserDetailsService {
 
     List<AppUser> getAllActiveUsers(int page, int size);
 
-    BaseResponse saveAppUser(UserRequest userRequest);
+    AppUser saveAppUser(UserRequest userRequest) throws Exception;
 
-    BaseResponse updateUser(Long id, UserRequest userRequest);
+    AppUser updateUser(Long id, UserRequest userRequest);
 
-    BaseResponse initiateUserVerification(Long userId);
+    BaseResponse verifyUser(Long userId, String code);
 
-    BaseResponse verifyUser(String code);
+    void deleteUser(Long id);
 
-    BaseResponse deactivateUser(Long id);
+    void verifyUserBvn(Long userId, BvnVerificationRequest request);
+
+    void verifyUserEmail(Long userId, String code);
+
+    void saveUserIdPath(Long userId, ProfileVerificationRequest request);
 }
