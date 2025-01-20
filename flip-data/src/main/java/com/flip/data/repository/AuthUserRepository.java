@@ -12,6 +12,6 @@ public interface AuthUserRepository extends JpaRepository<AuthUser, Long> {
 
     AuthUser findAuthUserByIdAndEnabled(Long id, boolean enabled);
 
-    AuthUser findByUsername(String username);
+    AuthUser findAuthUserByUsername(String username);
 
 }

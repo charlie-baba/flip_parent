@@ -1,5 +1,6 @@
 package com.flip.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.flip.data.enums.UserStatus;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,22 +16,22 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Table(name = "auth_users")
+@Table(name = "app_users")
 public class AppUser extends BaseEntity {
 
     @Column(name = "title")
     private String title;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
     @Column(name = "middle_name")
     private String middleName;
 
-    @Column(name = "last_name")
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @Column(name = "phone_number")
@@ -39,15 +40,12 @@ public class AppUser extends BaseEntity {
     @Column(name = "avatar")
     private String avatar;
 
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = AuthUser.class)
-    @JoinColumn(name = "auth_user_fk", nullable = false)
-    private AuthUser authUser;
+    @Column(name = "bvn")
+    private String bvn;
 
-    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class)
-    @JoinTable(name = "user_role_mapping",
-            joinColumns = { @JoinColumn(name = "user_id") },
-            inverseJoinColumns = { @JoinColumn(name = "role_id") })
-    private Set<Role> userRoles = new HashSet<>();
+    @Column(name = "dob")
+    @Temporal(TemporalType.DATE)
+    private Date dOB;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
@@ -57,15 +55,29 @@ public class AppUser extends BaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateVerified;
 
-    @Column(name = "verification_code")
-    private String verificationCode;
-
     @Column(name = "is_account_blocked")
     private boolean accountBlocked = false;
 
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity = AuthUser.class, cascade = CascadeType.ALL)
+    @JoinColumn(name = "auth_user_fk")
+    private AuthUser authUser;
+
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class)
+    @JoinTable(name = "user_role_mapping",
+            joinColumns = { @JoinColumn(name = "user_id") },
+            inverseJoinColumns = { @JoinColumn(name = "role_id") })
+    private Set<Role> userRoles = new HashSet<>();
+
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, targetEntity = Address.class)
     @JoinColumn(name="app_user_fk")
     private Set<Address> addresses = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, targetEntity = UserIdentification.class)
+    @JoinColumn(name="app_user_fk")
+    private Set<UserIdentification> userIdentifications = new HashSet<>();
 
     public boolean addRole(Role role) {
         return this.userRoles.add(role);
@@ -80,8 +92,7 @@ public class AppUser extends BaseEntity {
         return (object instanceof AppUser && ((AppUser) object).getId().equals(this.getId()));
     }
 
-    public AppUser() {
-    }
+    public AppUser() { }
 
     public AppUser(AuthUser authUser) {
         this.setAuthUser(authUser);
@@ -89,7 +100,7 @@ public class AppUser extends BaseEntity {
 
     public AppUser(String title, String firstName, String middleName, String lastName, String email, String phoneNumber,
                    String avatar, AuthUser authUser, Set<Role> userRoles, UserStatus status, Date dateVerified,
-                   String verificationCode, boolean accountBlocked, Set<Address> addresses) {
+                   boolean accountBlocked, Set<Address> addresses) {
         this.title = title;
         this.firstName = firstName;
         this.middleName = middleName;
@@ -101,7 +112,6 @@ public class AppUser extends BaseEntity {
         this.userRoles = userRoles;
         this.status = status;
         this.dateVerified = dateVerified;
-        this.verificationCode = verificationCode;
         this.accountBlocked = accountBlocked;
         this.addresses = addresses;
     }
